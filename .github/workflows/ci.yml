@@ -42,13 +42,30 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          # The project compiles with Java 25 source/target compatibility
+          # (app/build.gradle compileOptions), matching Sora-Editor.yml.
+          java-version: '25'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
         run: ./gradlew assembleRelease --parallel --stacktrace
+
+      - name: Get version and short SHA
+        id: get_tag
+        run: |
+          # Same single-source-of-truth version as Sora-Editor.yml: version.properties.
+          major=$(grep -Po '^versionMajor=\K[0-9]+' version.properties)
+          minor=$(grep -Po '^versionMinor=\K[0-9]+' version.properties)
+          patch=$(grep -Po '^versionPatch=\K[0-9]+' version.properties)
+          if [ -z "$major" ] || [ -z "$minor" ] || [ -z "$patch" ]; then
+            tag='1.8.4'
+          else
+            tag="$major.$minor.$patch"
+          fi
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "Short_SHA=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
 
       - name: Rename artifact
         id: rename

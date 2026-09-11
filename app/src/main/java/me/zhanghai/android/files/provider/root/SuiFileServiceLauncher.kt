@@ -148,15 +148,24 @@ object SuiFileServiceLauncher {
             if (!isSuiAvailable() && !isShizukuBinderAvailable() && !isStellarBinderAvailable()) {
                 throw RemoteFileSystemException("Shizuku/Stellar isn't available")
             }
-            // The original Shizuku backend takes precedence, but only when the real Shizuku
-            // manager is installed: the Stellar manager's Shizuku compatibility layer also
-            // answers Shizuku.pingBinder(), yet its startUserService/attachUserService path
-            // cannot deliver our user service binder, so fall back to the Stellar-specific
-            // path in that case.
-            return if (isShizukuBinderAvailable() && isShizukuManagerInstalled()) {
-                launchShizukuService()
-            } else {
-                launchStellarService()
+            return when {
+                // Sui (https://github.com/RikkaApps/Sui) is a Shizuku implementation shipped
+                // as a Magisk/KernelSU module: it speaks the full Shizuku API — including
+                // bindUserService() — but installs NO manager app, so isShizukuManagerInstalled()
+                // is false. It must still use the Shizuku path; otherwise it wrongly falls to
+                // the Stellar path and fails with "Service not connected" (Stellar isn't
+                // actually running). This is why access only worked after installing the real
+                // Shizuku app before.
+                isSuiAvailable() -> launchShizukuService()
+                // The real Shizuku manager app: the original Shizuku startUserService() path.
+                isShizukuBinderAvailable() && isShizukuManagerInstalled() -> launchShizukuService()
+                // The Stellar manager also answers Shizuku.pingBinder() through its compat
+                // layer, yet its startUserService()/attachUserService() can't deliver our
+                // user-service binder, so use the Stellar-specific path for it.
+                isStellarBinderAvailable() -> launchStellarService()
+                // Only a bare Shizuku binder (e.g. ADB-started Shizuku without its manager
+                // app): still try the Shizuku path.
+                else -> launchShizukuService()
             }
         }
     }

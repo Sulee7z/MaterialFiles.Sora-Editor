@@ -1402,6 +1402,11 @@ class FileListActivity : AppActivity() {
     companion object {
         const val STATE_ACTIVE_PANE_SECONDARY = "state_active_pane_secondary"
 
+        /** Name of the file to select after the initial directory loads (the share-menu
+         *  "locate file" entry passes the shared file's name; see LocateFileActivity). */
+        const val EXTRA_LOCATE_FILE_NAME =
+            "me.zhanghai.android.files.extra.LOCATE_FILE_NAME"
+
         /** The system back-gesture zone width at each screen edge (approximate). */
         private const val SYSTEM_GESTURE_ZONE_DP = 24
 

@@ -817,6 +817,9 @@
     <string name="terminal_bubble_hide">Hide bubble</string>
     <string name="terminal_bubble_close">Close terminal</string>
     <string name="terminal_bubble_permission_hint">Enable the overlay permission to minimize the terminal into a floating bubble</string>
+    <string name="locate_file_activity_label">Locate file location</string>
+    <string name="locate_file_error">Unable to locate the shared file</string>
+    <string name="locate_file_not_found">File not found</string>
     <string name="settings_terminal_bubble_only_in_app_title">Terminal bubble only in app</string>
     <string name="settings_terminal_bubble_only_in_app_summary">Show the terminal bubble only while Material Files is in the foreground</string>
     <string name="copy_text">Copy</string>

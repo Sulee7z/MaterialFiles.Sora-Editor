@@ -229,6 +229,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     internal val viewModel by viewModels { { FileListViewModel() } }
 
+    /** One-shot guard for the share-menu "locate file" selection (EXTRA_LOCATE_FILE_NAME). */
+    private var locateFileConsumed = false
+
     /** The effective two-pane mode of the hosting Activity. Differs from the setting when
      *  this Activity is a picker (open file/directory/create), which always runs single-pane
      *  (two-pane hides the toolbar carrying the picker's confirm action). */
@@ -1221,7 +1224,31 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 // top instead of keeping a stale offset that would clip the first row.
                 layoutManager.scrollToPositionWithOffset(0, 0)
             }
+            consumePendingLocateFile(files)
         }
+    }
+
+    /**
+     * One-shot "locate file" from the share menu (see LocateFileActivity): after the
+     * target directory first loads, scroll to the shared file and select it.
+     */
+    private fun consumePendingLocateFile(files: List<FileItem>?) {
+        if (locateFileConsumed) {
+            return
+        }
+        locateFileConsumed = true
+        val fileName =
+            args.intent.getStringExtra(FileListActivity.EXTRA_LOCATE_FILE_NAME) ?: return
+        val target = files?.find { it.path.fileName.toString() == fileName }
+        if (target == null) {
+            showToast(R.string.locate_file_not_found)
+            return
+        }
+        val position = adapter.positionOf(target.path)
+        if (position >= 0) {
+            layoutManager.scrollToPositionWithOffset(position, 0)
+        }
+        viewModel.selectFile(target, true)
     }
 
     private fun getSubtitle(files: List<FileItem>): String {

@@ -1121,6 +1121,9 @@ MotionEvent.ACTION_DOWN -> {
         }
     }
 
+    /** Adapter position of the file with the given path, or -1 if it is not listed. */
+    fun positionOf(path: Path): Int = filePositionMap[path] ?: -1
+
     override fun getPopupText(view: View, position: Int): CharSequence {
         val file = getItem(position)
         return when (sortOptions.by) {
